@@ -1,93 +1,114 @@
+from pathlib import Path
+from datetime import datetime
 import urllib.request
 import json
-import datetime
 import random
 import string
 import time
-import os
-import sys
-os.system("title WARP-PLUS-CLOUDFLARE By ALIILAPRO")
-os.system('cls' if os.name == 'nt' else 'clear')
-print('      _______ _      __________________       _______ _______ _______ _______\n'
-'     (  ___  | \     \__   __|__   __( \     (  ___  |  ____ |  ____ |  ___  )\n'
-'     | (   ) | (        ) (     ) (  | (     | (   ) | (    )| (    )| (   ) |\n'
-'     | (___) | |        | |     | |  | |     | (___) | (____)| (____)| |   | |\n'
-'     |  ___  | |        | |     | |  | |     |  ___  |  _____)     __) |   | |\n'
-'     | (   ) | |        | |     | |  | |     | (   ) | (     | (\ (  | |   | |\n'
-'     | )   ( | (____/\__) (_____) (__| (____/\ )   ( | )     | ) \ \_| (___) |\n'
-'     |/     \(_______|_______|_______(_______//     \|/      |/   \__(_______)\n')
-print ("[+] ABOUT SCRIPT:")
-print ("[-] With this script, you can getting unlimited GB on Warp+.")
-print ("[-] Version: 4.0.0")
-print ("--------")
-print ("[+] THIS SCRIPT CODDED BY ALIILAPRO") 
-print ("[-] SITE: aliilapro.github.io") 
-print ("[-] TELEGRAM: aliilapro")
-print ("--------")
-referrer = input("[#] Enter the WARP+ ID:")
-def genString(stringLength):
-	try:
-		letters = string.ascii_letters + string.digits
-		return ''.join(random.choice(letters) for i in range(stringLength))
-	except Exception as error:
-		print(error)		    
-def digitString(stringLength):
-	try:
-		digit = string.digits
-		return ''.join((random.choice(digit) for i in range(stringLength)))    
-	except Exception as error:
-		print(error)	
-url = f'https://api.cloudflareclient.com/v0a{digitString(3)}/reg'
-def run():
-	try:
-		install_id = genString(22)
-		body = {"key": "{}=".format(genString(43)),
-				"install_id": install_id,
-				"fcm_token": "{}:APA91b{}".format(install_id, genString(134)),
-				"referrer": referrer,
-				"warp_enabled": False,
-				"tos": datetime.datetime.now().isoformat()[:-3] + "+02:00",
-				"type": "Android",
-				"locale": "es_ES"}
-		data = json.dumps(body).encode('utf8')
-		headers = {'Content-Type': 'application/json; charset=UTF-8',
-					'Host': 'api.cloudflareclient.com',
-					'Connection': 'Keep-Alive',
-					'Accept-Encoding': 'gzip',
-					'User-Agent': 'okhttp/3.12.1'
-					}
-		req         = urllib.request.Request(url, data, headers)
-		response    = urllib.request.urlopen(req)
-		status_code = response.getcode()	
-		return status_code
-	except Exception as error:
-		print(error)	
+import threading
 
-g = 0
-b = 0
-while True:
-	result = run()
-	if result == 200:
-		g = g + 1
-		os.system('cls' if os.name == 'nt' else 'clear')
-		print("")
-		print("                  WARP-PLUS-CLOUDFLARE (script)" + " By ALIILAPRO")
-		print("")
-		animation = ["[■□□□□□□□□□] 10%","[■■□□□□□□□□] 20%", "[■■■□□□□□□□] 30%", "[■■■■□□□□□□] 40%", "[■■■■■□□□□□] 50%", "[■■■■■■□□□□] 60%", "[■■■■■■■□□□] 70%", "[■■■■■■■■□□] 80%", "[■■■■■■■■■□] 90%", "[■■■■■■■■■■] 100%"] 
-		for i in range(len(animation)):
-			time.sleep(0.5)
-			sys.stdout.write("\r[+] Preparing... " + animation[i % len(animation)])
-			sys.stdout.flush()
-		print(f"\n[-] WORK ON ID: {referrer}")    
-		print(f"[:)] {g} GB has been successfully added to your account.")
-		print(f"[#] Total: {g} Good {b} Bad")
-		print("[*] After 18 seconds, a new request will be sent.")
-		time.sleep(18)
+def gen_str(str_len):
+	return ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(str_len))		    
+def digit_str(str_len):
+	return ''.join((random.choice(string.digits) for _ in range(str_len)))
+
+def gen_request(warp_id):
+	install_id = gen_str(22)
+	body = {"key": "{}=".format(gen_str(43)),
+			"install_id": install_id,
+			"fcm_token": "{}:APA91b{}".format(install_id, gen_str(134)),
+			"referrer": warp_id,
+			"warp_enabled": False,
+			"tos": datetime.now().isoformat()[:-3] + "+02:00",
+			"type": "Android",
+			"locale": "es_ES"}
+	data = json.dumps(body).encode('utf8')
+	headers = {'Content-Type': 'application/json; charset=UTF-8',
+				'Host': 'api.cloudflareclient.com',
+				'Connection': 'Keep-Alive',
+				'Accept-Encoding': 'gzip',
+				'User-Agent': 'okhttp/3.12.1'}
+	return urllib.request.Request(f'https://api.cloudflareclient.com/v0a{digit_str(3)}/reg', data, headers)
+
+# This mode doesn't use Proxy, thus doesn't support multithreading and bypass the 18sec wait.
+def normal_mode(warp_id): 
+	print("[i] No proxy mode selected, processing...")
+	sucess_req = 0
+	failed_req = 0
+	while True:
+		try:
+			response = urllib.request.urlopen(gen_request(warp_id))
+			response.close()
+		except Exception as error:
+			print(f"[:(] An error occurred while sending request: \n{error}")	
+		else:
+			if response.getcode() == 200:
+				sucess_req += 1
+				print(f"[:)] Added 1 GB to the WARP ID.")
+				print(f"[i] Total: {sucess_req} Sucess | {failed_req} Failed")
+				print("[i] After 18 seconds, a new request will be sent.")
+				time.sleep(17)
+			else:
+				failed_req += 1
+				print(f"[:(] Error when connecting to server, server response: \n{response.json()}")
+				print(f"[i] Total: {sucess_req} Sucess | {failed_req} Failed")
+		time.sleep(1) # Wait 1 seconds before send a new request.
+
+def threaded_proxy_process(thread_name, warp_id, proxies):
+	def tprint(*args, **kwargs):
+		print(f"{thread_name}: ",*args, **kwargs)
+	tprint("[i] Started.")
+	sucess_req = 0
+	failed_req = 0
+	while True:
+		try:
+			req = gen_request(warp_id)
+			proxy = random.choice(proxies)
+			tprint(f"Using proxy: {proxy}")
+			req.set_proxy(proxy, 'http')
+			tprint(f"URL: {req.full_url}")
+			response = urllib.request.urlopen(req)
+		except Exception as error:
+			tprint(f"[:(] Error: \n{error}")	
+		else:
+			if response.getcode() == 200:
+				sucess_req += 1
+				tprint("Added 1 GB to the WARP ID.")
+			else:
+				failed_req += 1
+				tprint(f"[:(] Error, server response: \n{response.json()}")
+			tprint(f"[i] Total: {sucess_req} Sucess | {failed_req} Failed")
+		time.sleep(1) # Wait 1 seconds before send a new request.
+
+def proxy_mode(warp_id):
+	proxies = open("./http_proxies.txt", "r").readlines()
+	threads_str = input("[?] How many threads do you want to use?: ")
+	if threads_str.isdigit():
+		threads = []
+		for i in range(int(threads_str)):
+			print(f"Creating thread {i}...")
+			tiny_thread = threading.Thread(target=threaded_proxy_process, args=(f"T-{i}",warp_id,proxies))
+			threads.append(tiny_thread)
+			tiny_thread.start()
+		print("All threads are running...")
+		while True:
+			time.sleep(1)
+			
 	else:
-		b = b + 1
-		os.system('cls' if os.name == 'nt' else 'clear')
-		print("")
-		print("                  WARP-PLUS-CLOUDFLARE (script)" + " By ALIILAPRO")
-		print("")
-		print("[:(] Error when connecting to server.")
-		print(f"[#] Total: {g} Good {b} Bad")	
+		print("[:(] Invalid number of threads: %s" % threads_str)
+
+print("[i] WARP+ Unlimited GB script by ALIAPRO@github, forked by teppyboy@github")
+warp_id = input("[?] Enter the WARP+ ID: ")
+print("""[!] Proxies helps this script bypass the 18s cooldown before sending 
+a new request, and also speed up the process by multithreading.
+Note that this script reads proxies from 'http_proxies.txt' and
+the proxy format is 'proxy':'port'""")
+use_proxy_string = input("[?] Do you want to use Proxy? (y/N): ").lower()
+if use_proxy_string == "y":
+	proxies_path = Path("./http_proxies.txt")
+	if proxies_path.exists():
+		proxy_mode(warp_id)
+	else:
+		print("[:(] Proxies file does not exist, exiting.")
+else:
+	normal_mode(warp_id)
