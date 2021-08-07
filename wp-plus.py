@@ -90,9 +90,8 @@ def proxy_mode(warp_id):
 			tiny_thread = threading.Thread(target=threaded_proxy_process, args=(f"T-{i}",warp_id,proxies))
 			threads.append(tiny_thread)
 			tiny_thread.start()
-		print("All threads are running...")
-		while True:
-			time.sleep(1)
+		print("All threads are running, starting main thread...")
+		threaded_proxy_process("T-Main", warp_id, proxies)
 			
 	else:
 		print("[:(] Invalid number of threads: %s" % threads_str)
