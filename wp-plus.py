@@ -69,6 +69,7 @@ def threaded_proxy_process(thread_name, warp_id, proxies):
 			tprint(f"URL: {req.full_url}")
 			response = urllib.request.urlopen(req)
 		except Exception as error:
+			failed_req += 1
 			tprint(f"[:(] Error: \n{error}")	
 		else:
 			if response.getcode() == 200:
