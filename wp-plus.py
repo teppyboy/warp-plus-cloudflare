@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 from pathlib import Path
 from datetime import datetime
 import urllib.request
@@ -6,6 +8,9 @@ import random
 import string
 import time
 import threading
+import ssl
+
+fake_ssl_context = ssl._create_unverified_context()
 
 def gen_str(str_len):
 	return ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(str_len))		    
@@ -57,17 +62,17 @@ def normal_mode(warp_id):
 def threaded_proxy_process(thread_name, warp_id, proxies):
 	def tprint(*args, **kwargs):
 		print(f"{thread_name}: ",*args, **kwargs)
-	tprint("[i] Started.")
+	tprint("Started.")
 	sucess_req = 0
 	failed_req = 0
 	while True:
 		try:
 			req = gen_request(warp_id)
 			proxy = random.choice(proxies)
-			tprint(f"Using proxy: {proxy}")
 			req.set_proxy(proxy, 'http')
+			tprint(f"Using proxy: {proxy}")
 			tprint(f"URL: {req.full_url}")
-			response = urllib.request.urlopen(req)
+			response = urllib.request.urlopen(req, context=fake_ssl_context)
 		except Exception as error:
 			failed_req += 1
 			tprint(f"[:(] Error: \n{error}")	
@@ -79,10 +84,12 @@ def threaded_proxy_process(thread_name, warp_id, proxies):
 				failed_req += 1
 				tprint(f"[:(] Error, server response: \n{response.json()}")
 			tprint(f"[i] Total: {sucess_req} Sucess | {failed_req} Failed")
-		time.sleep(1) # Wait 1 seconds before send a new request.
+		time.sleep(0.1) # Wait 0.1 seconds before send a new request.
 
 def proxy_mode(warp_id):
-	proxies = open("./http_proxies.txt", "r").readlines()
+	proxies = None
+	with open("./http_proxies.txt", "r") as proxies_file:
+		proxies = proxies_file.readlines()
 	threads_str = input("[?] How many threads do you want to use?: ")
 	if threads_str.isdigit():
 		threads = []
