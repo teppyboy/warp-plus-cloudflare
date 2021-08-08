@@ -45,6 +45,7 @@ def normal_mode(warp_id):
 			response = urllib.request.urlopen(gen_request(warp_id))
 			response.close()
 		except Exception as error:
+			failed_req += 1
 			print(f"[:(] An error occurred while sending request: \n{error}")	
 		else:
 			if response.getcode() == 200:
