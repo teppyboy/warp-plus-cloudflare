@@ -62,7 +62,7 @@ def normal_mode(warp_id):
 
 def threaded_proxy_process(thread_name, warp_id, proxies):
 	def tprint(*args, **kwargs):
-		print(f"{thread_name}: ",*args, **kwargs)
+		print(f"{thread_name}:",*args, **kwargs)
 	tprint("Started.")
 	sucess_req = 0
 	failed_req = 0
@@ -76,16 +76,17 @@ def threaded_proxy_process(thread_name, warp_id, proxies):
 			response = urllib.request.urlopen(req, context=fake_ssl_context)
 		except Exception as error:
 			failed_req += 1
-			tprint(f"[:(] Error: \n{error}")	
+			tprint(f"Error: \n{error}")
 		else:
 			if response.getcode() == 200:
 				sucess_req += 1
 				tprint("Added 1 GB to the WARP ID.")
+				time.sleep(18)
 			else:
 				failed_req += 1
-				tprint(f"[:(] Error, server response: \n{response.json()}")
-			tprint(f"[i] Total: {sucess_req} Sucess | {failed_req} Failed")
-		time.sleep(0.1) # Wait 0.1 seconds before send a new request.
+				tprint(f"Error, server response: \n{response.json()}")
+			tprint(f"Total: {sucess_req} Sucess | {failed_req} Failed")
+		time.sleep(0.01) # Wait 0.1 seconds before send a new request.
 
 def proxy_mode(warp_id):
 	proxies = None
